@@ -22,6 +22,7 @@
     "@angular/router": "^6.0.2",
     "@uirouter/angular": "^2.0.0",
     "core-js": "^2.5.4",
+    "oidc-client": "^1.5.0-beta.4",
     "rxjs": "^6.0.0",
     "zone.js": "^0.8.26"
   },
