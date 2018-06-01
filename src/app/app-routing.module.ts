@@ -1,6 +1,8 @@
-import { NgModule } from '@angular/core';
-import { RootModule, UIRouterModule, Transition, StateService, TargetState, UrlRuleHandlerFn, StateDeclaration } from '@uirouter/angular';
+import { NgModule, Injector } from '@angular/core';
+import { RootModule, UIRouterModule, Transition, TargetState, UIRouter, StatesModule, StateDeclaration, UrlRuleHandlerFn, UrlParts, TransitionService, StateService, HookMatchCriteria, TransitionHookFn } from '@uirouter/angular';
 import { HomeComponent } from './home/home.component';
+import { UserProfileComponent } from './user-profile/user-profile.component';
+import { VeApiService } from './ve-api/ve-api.service';
 
 const rootModule: RootModule = {
   states: [
@@ -13,18 +15,52 @@ const rootModule: RootModule = {
       name: "OIDCRedirect",
       url: "/oidcredirect",
       onEnter: (trans: Transition, state: StateDeclaration) => {
-        return trans.router.stateService.go("Home");
+        trans.router.stateService.go("Home");
+      }
+    },
+    {
+      name: "Profile",
+      url: "/profile",
+      component: UserProfileComponent,
+      resolve: [
+        {
+          token: "IS3Profile",
+          deps: [VeApiService],
+          resolveFn: (api: VeApiService) => {
+            return api.getIS3UserProfile();
+          }
+        }
+      ],
+      data: {
+        requiresAuth: null
       }
     }
   ],
   config: (uiRouter, injector, statesModule) => {
-    let otherwiseHandler: UrlRuleHandlerFn = (matchvalue, url, router) => {
+    let otherwiseHandler: UrlRuleHandlerFn = (matchValue: any, url: UrlParts, router: UIRouter) => {
       return "/home";
     };
     uiRouter.urlService.rules.otherwise(otherwiseHandler);
+
+    let api = injector.get(VeApiService);
+    requiresAuthHook(uiRouter.transitionService, api, uiRouter.stateService);
   },
   useHash: true
 };
+
+export function requiresAuthHook(trans: TransitionService, api: VeApiService, state: StateService) {
+  const requiresAuthCriteria: HookMatchCriteria = {
+    to: (state) => !!state.data && !!state.data.requiresAuth
+  };
+
+  const redirectToLogin: TransitionHookFn = (transition) => {
+    if (!api.isLoggedIn()) {
+      return state.target("login", { from: transition.from.name });
+    }
+  };
+
+  trans.onBefore(requiresAuthCriteria, redirectToLogin, { priority: 10 });
+}
 
 @NgModule({
   imports: [UIRouterModule.forRoot(rootModule)],
