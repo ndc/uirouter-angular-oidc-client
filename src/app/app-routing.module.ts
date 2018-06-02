@@ -27,12 +27,12 @@ const rootModule: RootModule = {
           token: "IS3Profile",
           deps: [VeApiService],
           resolveFn: (api: VeApiService) => {
-            return api.getIS3UserProfile();
+            return api.GetIS3UserProfile();
           }
         }
       ],
       data: {
-        requiresAuth: null
+        requiresAuth: true
       }
     }
   ],
@@ -54,9 +54,12 @@ export function requiresAuthHook(trans: TransitionService, api: VeApiService, st
   };
 
   const redirectToLogin: TransitionHookFn = (transition) => {
-    if (!api.isLoggedIn()) {
-      return state.target("login", { from: transition.from.name });
-    }
+    return api.IsLoggedIn().then(loggedIn => {
+      if (!loggedIn) {
+        api.StartSignInMainWindow();
+        return false;
+      }
+    });
   };
 
   trans.onBefore(requiresAuthCriteria, redirectToLogin, { priority: 10 });
