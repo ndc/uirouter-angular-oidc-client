@@ -24,10 +24,11 @@ const rootModule: RootModule = {
       component: UserProfileComponent,
       resolve: [
         {
-          token: "IS3Profile",
+          token: "OidcProfile",
           deps: [VeApiService],
           resolveFn: (api: VeApiService) => {
-            return api.GetIS3UserProfile();
+            let userStr = JSON.stringify(api.GetOidcUser());
+            return userStr;
           }
         }
       ],
@@ -43,10 +44,24 @@ const rootModule: RootModule = {
     uiRouter.urlService.rules.otherwise(otherwiseHandler);
 
     let api = injector.get(VeApiService);
-    requiresAuthHook(uiRouter.transitionService, api, uiRouter.stateService);
+    InitializeOidc(api).then(() => {
+      requiresAuthHook(uiRouter.transitionService, api, uiRouter.stateService);
+    });
   },
   useHash: true
 };
+
+export function InitializeOidc(api: VeApiService) {
+  let redirectUri = window.location.href.split("#")[0]
+    + "assets/oidcredirect.html";
+  return api.InitializeOidc({
+    authority: "https://demo.identityserver.io",
+    client_id: "implicit",
+    redirect_uri: redirectUri,
+    response_type: "id_token token",
+    scope: "openid profile email api"
+  });
+}
 
 export function requiresAuthHook(trans: TransitionService, api: VeApiService, state: StateService) {
   const requiresAuthCriteria: HookMatchCriteria = {
@@ -54,12 +69,13 @@ export function requiresAuthHook(trans: TransitionService, api: VeApiService, st
   };
 
   const redirectToLogin: TransitionHookFn = (transition) => {
-    return api.IsLoggedIn().then(loggedIn => {
-      if (!loggedIn) {
-        api.StartSignInMainWindow();
-        return false;
-      }
-    });
+    if (!api.IsLoggedIn()) {
+      let target = state.href(
+        transition.targetState().name(),
+        transition.targetState().params(),
+        { absolute: true });
+      return api.StartSignIn(target);
+    }
   };
 
   trans.onBefore(requiresAuthCriteria, redirectToLogin, { priority: 10 });

@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>OIDC Connect Redirection</title>
+</head>
+
+<body>
+    <script>
+        "use strict";
+        sessionStorage.setItem("OidcRedirect", window.location.href);
+        var redirectUrl = window.location.href.split("assets/oidcredirect")[0];
+        window.location = redirectUrl;
+    </script>
+</body>
+
+</html>
