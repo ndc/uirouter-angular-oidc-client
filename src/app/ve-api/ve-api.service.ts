@@ -42,7 +42,19 @@ export class VeApiService {
   }
 
   StartSignIn(target: string) {
-    let prmse = this.OidcManager.signinRedirect({}).then((response) => false);
+    let prmse = this.OidcManager.signinRedirect({}).then(args => false);
+    return prmse;
+  }
+
+  StartSignInWithPopUp(target: string) {
+    let prmse = this.OidcManager.signinPopup({}).then((user: User) => {
+      if (!!user) {
+        this.OidcUser = user;
+        return true;
+      } else {
+        return false;
+      }
+    });
     return prmse;
   }
 
