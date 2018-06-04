@@ -1,27 +1,26 @@
 # TryOpenIdConnect
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.3.
+This project is a brain dump when I was learning OpenID Connect (OIDC).
 
-## Development server
+The [oidc-client](https://github.com/IdentityModel/oidc-client-js) library is not the best documented library there is :)
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+I need to implement OpenID Connect on an angular project that uses [UI-Router](https://ui-router.github.io/ng2/) with hash location strategy.
 
-## Code scaffolding
+The `src/app/app-routing.module.ts` and `src/app/ve-api/ve-api.service.ts` are the main attractions of this project. They contain multiple comments.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Some issues that I tackled:
 
-## Build
+* Which oidc-client's commands should I use?
+* How to capture the redirect from OIDC provider (OP)?
+* What to do when OP mangles the redirect URL that we gave it?
+* Which flow to use? Authorization code flow or implicit flow?
+* If I want to use implicit flow, what oidc-client settings should I use?
+* What is oidc-client doing behind the scene?
+* Do users have to login each time they open the app?
+* How does oidc-client remember user's login information?
+* How to prevent race condition between initializing oidc-client and setting up route authorization guard?
+* Which is better, using the same tab or open a pop up?
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+It took me about two weeks on and off banging my head doing trial and error to finally have a working authentication process.
 
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+I can provide a short consultation if you want. Ask me.
